@@ -13,6 +13,9 @@
 #include  <iostream>
 #include  <fstream>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 class Shader{
 
     bool  SHADER_ERROR_CHECK (unsigned int shaderid, bool type);
@@ -22,9 +25,16 @@ class Shader{
 
 public:
 
-    unsigned int program;
+    unsigned int m_ID;
 
-    void use();
+    void use(),
+
+    setmat4(const char* name, glm::mat4& val),
+    setmat3(const char* name, glm::mat3& val),
+    setvec3(const char* name, glm::vec3& val),
+    setvec4(const char* name, glm::vec4& val),
+    setfloat(const char* name, float& val);
+
 
     Shader(const std::string& vs_path, const std::string& fs_path);
     ~Shader();

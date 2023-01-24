@@ -51,12 +51,12 @@ Shader::Shader(const std::string& vs_path, const std::string& fs_path){
 
     std::cout << "SHADERS_COMPILED\n";
 
-    program = glCreateProgram();
-    glAttachShader(program, vertexshader);
-    glAttachShader(program, fragmentshader);
-    glLinkProgram(program);
+    m_ID = glCreateProgram();
+    glAttachShader(m_ID, vertexshader);
+    glAttachShader(m_ID, fragmentshader);
+    glLinkProgram(m_ID);
 
-    if(!SHADER_ERROR_CHECK(program, SHADER_PROGRAM) ) exit(EXIT_FAILURE);
+    if(!SHADER_ERROR_CHECK(m_ID, SHADER_PROGRAM) ) exit(EXIT_FAILURE);
     printf("SHADER_PROGRAM_LINKED\n");
 
     glDeleteShader(vertexshader);
@@ -64,11 +64,38 @@ Shader::Shader(const std::string& vs_path, const std::string& fs_path){
 
 }
 
+void Shader::setmat3(const char* name,  glm::mat3& val)
+{
+    glUniformMatrix3fv(glGetUniformLocation(m_ID, name), 1, false, glm::value_ptr(val));  
+}
+
+void Shader::setmat4(const char* name,  glm::mat4& val)
+{
+    glUniformMatrix4fv(glGetUniformLocation(m_ID, name), 1, false, glm::value_ptr(val));
+}
+
+void Shader::setfloat(const char* name,  float& val)
+{
+    glUniform1f(glGetUniformLocation(m_ID, name), val);
+}
+
+void Shader::setvec3(const char* name,  glm::vec3& val)
+{
+    glUniform3fv(glGetUniformLocation(m_ID, name), 1, glm::value_ptr(val));
+}
+
+void Shader::setvec4(const char* name,  glm::vec4& val)
+{
+    glUniform4fv(glGetUniformLocation(m_ID, name), 1, glm::value_ptr(val));
+}
+
+
+
 void Shader::use()
 {
-    glUseProgram(program);
+    glUseProgram(m_ID);
 }
 
 Shader::~Shader(){
-    glDeleteProgram(program);
+    glDeleteProgram(m_ID);
 }

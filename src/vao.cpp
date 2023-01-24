@@ -11,6 +11,8 @@ vao::vao()
 vao::~vao()
 {
     glDeleteVertexArrays(1, &m_ID);
+
+    delete m_vao_buffer;
 }
 
 void vao::push(unsigned int nSize, bool normalize)
@@ -40,7 +42,8 @@ void vao::flush() const
     }
 
     unbind();
-    delete m_vao_buffer;
+    
+    m_vao_buffer->clear();
 }
 
 void vao::bind() const

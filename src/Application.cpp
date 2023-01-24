@@ -24,59 +24,71 @@ void Application::run()
     
     float verticies [] = 
     {
-     0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,// top right
-     0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,// bottom right
-    -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,// bottom left
-    -0.5f,  0.5f, 0.0f,  0.0f, 0.0f, 0.0f// top left 
+     0.5f,  0.5f,  0.5,     1.0f, 0.0f, 0.0f,// top right
+     0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,// bottom right
+    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,// bottom left
+    -0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 0.0f,// top left 
+     0.5f,  0.5f, -0.5f,    1.0f, 0.0f, 0.0f,// top right
+     0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,// bottom right
+    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,// bottom left
+    -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, 0.0f // top left 
     };
 
     unsigned int indicies [] =
     {
         0,1,3,
-        1,2,3
+        1,2,3,
+
+        4,5,7,
+        5,6,7,
+
+        0,4,1,
+        1,4,5,
+
+        3,7,6,
+        2,3,6,
+
+        0,3,7,
+        4,7,1,
+
+        1,2,6,
+        5,6,1
     };
-
- 
-
     
 
-    vbo VBO1(verticies, sizeof(verticies), GL_STATIC_DRAW);
-    vao VAO1;
-    ebo EBO1(indicies, sizeof(indicies), GL_STATIC_DRAW);
-    
-    VBO1.bind();
-    EBO1.bind();
-    
-    VAO1.push(3, true); 
-    VAO1.push(3, false);
-    VAO1.flush();
+    /*Mesh* square = new Mesh(verticies_a, sizeof(verticies_a)/sizeof(float), indicies_a, sizeof(indicies_a)/sizeof(unsigned int), GL_STATIC_DRAW);
+    Mesh* tris = new Mesh(verticies_b, sizeof(verticies_b)/sizeof(float), indicies_b, sizeof(indicies_b)/sizeof(float), GL_STATIC_DRAW);
+    */
 
-    VBO1.unbind();
-    EBO1.unbind();
-
+    Mesh Player(verticies, sizeof(verticies)/sizeof(float), indicies, sizeof(indicies)/sizeof(unsigned int), GL_DYNAMIC_DRAW);
+    
     Shader shader("../shaders/vertex.vs", "../shaders/fragment.fs");
 
-    //event_loop(VAO1, shader, in * 3);
+    Renderer r1 (*WIN);
+    
 
-    Renderer r1;
+    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
+    /* EVENT LOOP */
+
+    const float speed = 0.1f;
+    
     while(!glfwWindowShouldClose(WIN))
     {
 
-        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+        /*  PROCESS INPUT */
 
         
-
-        glUseProgram(shader.program);
-
-        VAO1.bind();
+        if(glfwGetKey(WIN, GLFW_KEY_A) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(-speed,0.f,0.f));
+        if(glfwGetKey(WIN, GLFW_KEY_W) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,speed));
+        if(glfwGetKey(WIN, GLFW_KEY_S) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,-speed));
+        if(glfwGetKey(WIN, GLFW_KEY_D) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(speed,0.f,0.f));
         
-      
-        
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        /* RENDER */
 
-        //std::cout << "debug" << '\n';
+        r1.refresh();
+
+        r1.draw(Player, shader);
 
         glfwSwapBuffers(WIN);
         glfwPollEvents();

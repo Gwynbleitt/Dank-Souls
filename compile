@@ -1,1 +1,1 @@
-g++ ../include/glad/glad.c *.cpp  -o a -I /usr/include/X11  -I ../include/ -I ../headers/ -lglfw  -lX11 -lGL -lGLU
+g++ ../include/glad/glad.c *.cpp  -o danksouls -I /usr/include/X11  -I ../include/ -I ../headers/ -lglfw  -lX11 -lGL -lGLU

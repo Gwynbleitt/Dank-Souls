@@ -2,6 +2,8 @@
 #include "vbo.h"
 #include "ebo.h"
 
+#include <glm/glm.hpp>
+
 struct Trasnform
 {
 
@@ -22,6 +24,8 @@ public:
     unsigned int* m_indicies;
 
     unsigned int m_nData, m_nIndex;
+
+    glm::mat4* m_Mtransfrom;
 
     vao* m_VAO;
     vbo* m_VBO;
