@@ -1,7 +1,12 @@
 #include "Application.h"
 
-void Application::run()
+void Application::run(const char* path)
 {
+
+    /* CONSTANT VALUES */
+    const float camera_speed = 4.0f;
+    const float sensitivity = 0.1f;
+    /*------------------*/
 
     if(!glfwInit()) exit(EXIT_FAILURE);
 
@@ -14,85 +19,101 @@ void Application::run()
 
     WIN = glfwCreateWindow(visual->width, visual->height, "Dank Souls",  NULL, NULL);
     if(!WIN) exit(EXIT_FAILURE);
-
     glfwMakeContextCurrent(WIN);
     glfwSetFramebufferSizeCallback(WIN, s_FB_size_callback);
     glfwSetKeyCallback(WIN, s_KEY_callback);
-    glfwSetWindowUserPointer(WIN, this);
 
     if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) exit(EXIT_FAILURE);
+
+    Model suzanne ("Suzanne");
+
+    suzanne.LoadModel(path);
+
+    //print vertex data
+
+    Shader shader("${workspaceFolder}/shaders/vertex.vs", "${workspaceFolder}/shaders/fragment.fs");
+    glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+    glEnable(GL_DEPTH_TEST);
+    glfwSetInputMode(WIN, GLFW_CURSOR, GLFW_CURSOR_DISABLED);  
+
+    Camera cam1;
     
-    float verticies [] = 
-    {
-     0.5f,  0.5f,  0.5,     1.0f, 0.0f, 0.0f,// top right
-     0.5f, -0.5f,  0.5f,    0.0f, 1.0f, 0.0f,// bottom right
-    -0.5f, -0.5f,  0.5f,    0.0f, 0.0f, 1.0f,// bottom left
-    -0.5f,  0.5f,  0.5f,    0.0f, 0.0f, 0.0f,// top left 
-     0.5f,  0.5f, -0.5f,    1.0f, 0.0f, 0.0f,// top right
-     0.5f, -0.5f, -0.5f,    0.0f, 1.0f, 0.0f,// bottom right
-    -0.5f, -0.5f, -0.5f,    0.0f, 0.0f, 1.0f,// bottom left
-    -0.5f,  0.5f, -0.5f,    0.0f, 0.0f, 0.0f // top left 
-    };
+    Renderer r1 (*WIN, 90, 0.1f, 5.0f);
+    glfwSetWindowUserPointer(WIN, &r1);
 
-    unsigned int indicies [] =
-    {
-        0,1,3,
-        1,2,3,
+    glm::vec3 
+    direction (0.0f),
+    direction2d (0.0f),
+    rotation  (0.0f, 0.0f, PI/2);
 
-        4,5,7,
-        5,6,7,
-
-        0,4,1,
-        1,4,5,
-
-        3,7,6,
-        2,3,6,
-
-        0,3,7,
-        4,7,1,
-
-        1,2,6,
-        5,6,1
-    };
+    glm::vec2 light_rotation(0.0f);
     
+    float speed;
 
-    /*Mesh* square = new Mesh(verticies_a, sizeof(verticies_a)/sizeof(float), indicies_a, sizeof(indicies_a)/sizeof(unsigned int), GL_STATIC_DRAW);
-    Mesh* tris = new Mesh(verticies_b, sizeof(verticies_b)/sizeof(float), indicies_b, sizeof(indicies_b)/sizeof(float), GL_STATIC_DRAW);
-    */
+    // CURSOR
 
-    Mesh Player(verticies, sizeof(verticies)/sizeof(float), indicies, sizeof(indicies)/sizeof(unsigned int), GL_DYNAMIC_DRAW);
-    
-    Shader shader("../shaders/vertex.vs", "../shaders/fragment.fs");
+    double cursor_pos[2];
+    double cursor_last[2];
+    double cursor_offset[2];
 
-    Renderer r1 (*WIN);
-    
+    glfwGetCursorPos(WIN, &cursor_last[0], &cursor_last[1]);
 
-    glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+    //EVENT LOOP 
 
-    /* EVENT LOOP */
+    float current_frame, delta_time = 0.0f, last_frame = 0.0f;
 
-    const float speed = 0.1f;
-    
+    const float light_speed = 0.02*PI;
+
     while(!glfwWindowShouldClose(WIN))
     {
+        current_frame = glfwGetTime();
+        delta_time = current_frame - last_frame;
+        last_frame = current_frame;
 
-        /*  PROCESS INPUT */
+        glfwGetCursorPos(WIN, &cursor_pos[0], &cursor_pos[1]);
 
+        cursor_offset[0] = cursor_pos[0]-cursor_last[0];
+        cursor_offset[1] = cursor_pos[1]-cursor_last[1];
+
+        cursor_last[0] = cursor_pos[0];
+        cursor_last[1] = cursor_pos[1];
+
+        rotation.x += cursor_offset[1] * sensitivity * delta_time;
+        rotation.z -= cursor_offset[0] * sensitivity * delta_time;
+
+        speed = camera_speed * delta_time;
+
+        glm::rotate(direction2d, direction, rotation);
+
+        direction2d = glm::normalize(direction2d);
         
-        if(glfwGetKey(WIN, GLFW_KEY_A) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(-speed,0.f,0.f));
-        if(glfwGetKey(WIN, GLFW_KEY_W) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,speed));
-        if(glfwGetKey(WIN, GLFW_KEY_S) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,-speed));
-        if(glfwGetKey(WIN, GLFW_KEY_D) == GLFW_PRESS) glm::translate(*(Player.m_Mtransfrom),glm::vec3(speed,0.f,0.f));
+        if(glfwGetKey(WIN, GLFW_KEY_A) == GLFW_PRESS) cam1.translate(-speed*cam1.r); //glm::translate(*(Player.m_Mtransfrom),glm::vec3(-speed,0.f,0.f));
+        if(glfwGetKey(WIN, GLFW_KEY_W) == GLFW_PRESS) cam1.translate(-speed*direction); //glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,-speed));
+        if(glfwGetKey(WIN, GLFW_KEY_S) == GLFW_PRESS) cam1.translate(speed*direction);  //glm::translate(*(Player.m_Mtransfrom),glm::vec3(0.f,0.f,speed));
+        if(glfwGetKey(WIN, GLFW_KEY_D) == GLFW_PRESS) cam1.translate(speed*cam1.r);  //glm::translate(*(Player.m_Mtransfrom),glm::vec3(speed,0.f,0.f));
+
+        //LIGHTS
+
+        if(glfwGetKey(WIN, GLFW_KEY_LEFT) == GLFW_PRESS) light_rotation[1] -= light_speed;
+        if(glfwGetKey(WIN, GLFW_KEY_RIGHT) == GLFW_PRESS) light_rotation[1] += light_speed;
+        if(glfwGetKey(WIN, GLFW_KEY_DOWN) == GLFW_PRESS) light_rotation[0] -= light_speed;
+        if(glfwGetKey(WIN, GLFW_KEY_UP) == GLFW_PRESS) light_rotation[0] += light_speed;
+
+        glm::rotate1(r1.m_lPoint.Position, light_rotation);
+
+        //CAMERA 
+
+        cam1.lookat(direction);
         
-        /* RENDER */
+        //RENDER 
 
         r1.refresh();
-
-        r1.draw(Player, shader);
+        r1.draw(suzanne.m_mesh[0], shader, *cam1.m_view, *cam1.m_camera);
 
         glfwSwapBuffers(WIN);
         glfwPollEvents();
     }
+    
 
 }
 
@@ -109,14 +130,11 @@ Application::~Application()
 
 void Application::s_FB_size_callback(GLFWwindow* window, int width, int height)
 {
-    Application* copy = static_cast<Application*>(glfwGetWindowUserPointer(window));
-
-    copy->FB_width = width;
-    copy->FB_height = height;
-
+    Renderer* copy = static_cast<Renderer*>(glfwGetWindowUserPointer(window));
+    
+    copy->fb_u(width, height);
+  
     glViewport(0, 0, width, height);
-
-    printf("framebuffer callback\n");
 }
 
 void Application::s_KEY_callback(GLFWwindow* window, int key, int scancode, int action, int mods)

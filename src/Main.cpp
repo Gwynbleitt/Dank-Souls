@@ -1,12 +1,12 @@
 #include "Application.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-
-
     Application app;
 
-    app.run();
+    std::cout << argv[1] << '\n';
+
+    app.run(argv[1]);
 
     return 0;
 }

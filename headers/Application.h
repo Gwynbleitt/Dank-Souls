@@ -7,6 +7,8 @@
 
 #include "Renderer.h"
 
+#include <assimp/Importer.hpp>
+
 
 class Application
 {
@@ -22,10 +24,9 @@ public:
     s_KEY_callback(GLFWwindow* window, int key, int scancode, int action, int mods);    
 
     void 
-    event_loop(const vao& VAO, const Shader& shader, unsigned int n),
     load_mesh(float* verticies, int vn),
 
-    run();
+    run(const char* path);
 
    // Application();
     ~Application();

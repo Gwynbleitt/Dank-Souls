@@ -1,38 +1,29 @@
-#include "vao.h"
-#include "vbo.h"
-#include "ebo.h"
+#include <vector>
+#include "vertex.h"
+#include <iostream>
 
-#include <glm/glm.hpp>
+#include "glad/glad.h"
+#include <GLFW/glfw3.h>
 
-struct Trasnform
+struct Texture
 {
-
-};
-
-struct vertex
-{
-    
+    unsigned int id;
+    std::string type;
 };
 
 class Mesh
 {
 public:
 
-    float* m_vertex_data;
-    /* vertex postitions [vec3],  vertex normals [vec3] */
-
-    unsigned int* m_indicies;
-
-    unsigned int m_nData, m_nIndex;
+    std::vector<Vertex> m_verex_data;
+    std::vector<Texture> m_texture_data;
+    std::vector<unsigned int> m_indicies;
 
     glm::mat4* m_Mtransfrom;
 
-    vao* m_VAO;
-    vbo* m_VBO;
-    ebo* m_EBO;
+    unsigned int m_VAO, m_EBO, m_VBO;
 
-    Mesh(float (&v_arr)[], unsigned int nData, unsigned int (&i_arr)[], unsigned int nIndex, int Usage);
-    ~Mesh();
+    Mesh(std::vector<Vertex> verticies, std::vector<unsigned int> indicies, int Usage);
 
 
 };
